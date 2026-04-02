@@ -1,0 +1,43 @@
+@config '../tailwind.config.js';
+
+@import 'tailwindcss';
+
+@theme {
+  /* Marca: acciones, enlaces activos */
+  --color-primary: #7ca982;
+  /* Tarjetas: un poco más claras que el fondo, sin blanco puro */
+  --color-secondary: #f3f0e8;
+  /* Fondo general: papel cálido (menos brillo que blanco #fff) */
+  --color-background: #e2ddd3;
+  /* Hitos sacramentales (bordes, acentos) */
+  --color-accent: #d4a373;
+  /* Texto casi negro — más fácil de leer sobre fondos pastel */
+  --color-ink: #0a0a09;
+  --color-ink-muted: #151413;
+  /* Sombra suave un poco más marcada sobre fondo más oscuro */
+  --shadow-s: 0 1px 2px -1px rgb(10 10 9 / 0.08),
+    0 2px 10px -2px rgb(10 10 9 / 0.07);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply tracking-tight;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--color-background);
+  color: var(--color-ink);
+}
+
+#root {
+  min-height: 100dvh;
+}
