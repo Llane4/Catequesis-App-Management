@@ -53,18 +53,38 @@ export function DashboardPage() {
       setCargando(true)
       setError(null)
 
-      const { data, error: errConsulta } = await supabase
-        .from('curso_profesor')
-        .select('id, cursos(id, nombre, nivel, anio_academico, alumnos(count))')
-        .order('id', { ascending: true })
+      if (user.esAdmin) {
+        const { data, error: errConsulta } = await supabase
+          .from('cursos')
+          .select('id, nombre, nivel, anio_academico, alumnos(count)')
+          .order('nombre', { ascending: true })
 
-      if (cancelado) return
+        if (cancelado) return
 
-      if (errConsulta) {
-        setError(errConsulta.message)
-        setFilas([])
+        if (errConsulta) {
+          setError(errConsulta.message)
+          setFilas([])
+        } else {
+          const filasComoAsignaciones = (data ?? []).map((c) => ({
+            id: c.id,
+            cursos: c,
+          })) as unknown as CursoProfesorFila[]
+          setFilas(filasComoAsignaciones)
+        }
       } else {
-        setFilas((data ?? []) as unknown as CursoProfesorFila[])
+        const { data, error: errConsulta } = await supabase
+          .from('curso_profesor')
+          .select('id, cursos(id, nombre, nivel, anio_academico, alumnos(count))')
+          .order('id', { ascending: true })
+
+        if (cancelado) return
+
+        if (errConsulta) {
+          setError(errConsulta.message)
+          setFilas([])
+        } else {
+          setFilas((data ?? []) as unknown as CursoProfesorFila[])
+        }
       }
       setCargando(false)
     }
@@ -101,7 +121,9 @@ export function DashboardPage() {
   if (cargando) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold text-ink">Mis cursos</h1>
+        <h1 className="text-2xl font-semibold text-ink">
+          {user.esAdmin ? 'Todos los cursos' : 'Mis cursos'}
+        </h1>
         <p className="text-sm font-medium text-ink">Cargando cursos…</p>
       </div>
     )
@@ -110,7 +132,9 @@ export function DashboardPage() {
   if (error) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold text-ink">Mis cursos</h1>
+        <h1 className="text-2xl font-semibold text-ink">
+          {user.esAdmin ? 'Todos los cursos' : 'Mis cursos'}
+        </h1>
         <p className="text-sm font-medium text-red-800" role="alert">
           No se pudieron cargar los datos: {error}
         </p>
@@ -134,17 +158,32 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">Mis cursos</h1>
-        <p className="mt-1 text-base font-medium leading-relaxed text-ink">
-          Cursos donde figuras como profesor.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-ink">
+            {user.esAdmin ? 'Todos los cursos' : 'Mis cursos'}
+          </h1>
+          <p className="mt-1 text-base font-medium leading-relaxed text-ink">
+            {user.esAdmin
+              ? 'Vista de administración: todos los cursos del centro.'
+              : 'Cursos donde figuras como profesor.'}
+          </p>
+        </div>
+        {user.esAdmin ? (
+          <Link
+            to="/cursos/nuevo"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-ink shadow-s transition hover:brightness-[0.97] active:brightness-[0.94] sm:mt-0.5"
+          >
+            Crear curso
+          </Link>
+        ) : null}
       </div>
 
       {cursosOrdenados.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-ink/15 bg-secondary px-5 py-8 text-center text-base font-medium text-ink">
-          No tienes cursos asignados. Si es un error, contacta con
-          administración.
+          {user.esAdmin
+            ? 'No hay cursos registrados en la base de datos.'
+            : 'No tienes cursos asignados. Si es un error, contacta con administración.'}
         </p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">

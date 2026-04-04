@@ -8,9 +8,13 @@ import {
   type ReactNode,
 } from 'react'
 import { supabase } from '../lib/supabase'
+import { authUserFromSession } from '../services/authService'
 
 export type AuthUser = {
   email: string
+  userId: string
+  /** Marcado en public.profesores.es_admin (tras ejecutar patch_admin_profesor.sql). */
+  esAdmin: boolean
 }
 
 type AuthContextValue = {
@@ -28,20 +32,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authReady, setAuthReady] = useState(false)
 
   useEffect(() => {
-    void supabase.auth.getSession().then(({ data: { session } }) => {
-      const email = session?.user?.email?.trim()
-      setUser(email ? { email } : null)
-      setAuthReady(true)
+    let cancelled = false
+
+    void supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const next = await authUserFromSession(session)
+      if (!cancelled) {
+        setUser(next)
+        setAuthReady(true)
+      }
     })
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      const email = session?.user?.email?.trim()
-      setUser(email ? { email } : null)
+      void (async () => {
+        const next = await authUserFromSession(session)
+        if (!cancelled) setUser(next)
+      })()
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
   }, [])
 
   const login = useCallback((next: AuthUser) => {

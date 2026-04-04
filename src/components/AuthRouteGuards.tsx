@@ -23,6 +23,22 @@ export function RequireAuth() {
   return <Outlet />
 }
 
+/** Rutas solo para usuarios con es_admin = true en public.profesores. */
+export function RequireAdmin() {
+  const { user, authReady } = useAuth()
+
+  if (!authReady) {
+    return <AuthLoadingScreen />
+  }
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+  if (!user.esAdmin) {
+    return <Navigate to="/" replace />
+  }
+  return <Outlet />
+}
+
 /** Pantalla de login: si ya hay sesión, va al inicio. */
 export function LoginRoute() {
   const { user, authReady } = useAuth()

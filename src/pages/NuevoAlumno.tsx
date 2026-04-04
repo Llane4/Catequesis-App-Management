@@ -3,6 +3,7 @@ import type { PostgrestError } from '@supabase/supabase-js'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
+import { fetchCursosParaSelector } from '../services/cursosDisponibles'
 
 type TipoHitoSacramental =
   | 'bautismo'
@@ -60,18 +61,6 @@ type CursoFila = {
   nombre: string
   nivel: string
   anio_academico: string
-}
-
-type CursoProfesorFila = {
-  id: string
-  cursos: CursoFila | CursoFila[] | null
-}
-
-function cursoDesdeFila(
-  c: CursoFila | CursoFila[] | null,
-): CursoFila | null {
-  if (!c) return null
-  return Array.isArray(c) ? (c[0] ?? null) : c
 }
 
 function fechaMaxHoy(): string {
@@ -154,33 +143,16 @@ export function NuevoAlumno() {
       setCargandoCursos(true)
       setErrorCursos(null)
 
-      const { data, error: errConsulta } = await supabase
-        .from('curso_profesor')
-        .select('id, cursos(id, nombre, nivel, anio_academico)')
-        .order('id', { ascending: true })
+      const { cursos: lista, messageError } = await fetchCursosParaSelector(
+        user.esAdmin,
+      )
 
       if (cancelado) return
 
-      if (errConsulta) {
-        setErrorCursos(errConsulta.message)
+      if (messageError) {
+        setErrorCursos(messageError)
         setCursos([])
       } else {
-        const filas = (data ?? []) as unknown as CursoProfesorFila[]
-        const lista = filas
-          .map((f) => {
-            const curso = cursoDesdeFila(f.cursos)
-            return curso ? { asignacionId: f.id, curso } : null
-          })
-          .filter((x): x is { asignacionId: string; curso: CursoFila } =>
-            Boolean(x),
-          )
-          .sort((a, b) =>
-            (a.curso.nombre + a.curso.nivel).localeCompare(
-              b.curso.nombre + b.curso.nivel,
-              'es',
-              { sensitivity: 'base' },
-            ),
-          )
         setCursos(lista)
       }
       setCargandoCursos(false)

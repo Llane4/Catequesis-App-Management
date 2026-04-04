@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import {
   DefaultRedirect,
   LoginRoute,
+  RequireAdmin,
   RequireAuth,
 } from './components/AuthRouteGuards'
 import { Layout } from './components/Layout'
@@ -17,6 +18,8 @@ import { AlumnoFichaPage } from './pages/AlumnoFichaPage'
 import { NuevoAlumno } from './pages/NuevoAlumno'
 import { EditarAlumno } from './pages/EditarAlumno'
 import { BuscarAlumnosPage } from './pages/BuscarAlumnosPage'
+import { NuevoCursoPage } from './pages/NuevoCurso'
+import { PromocionarAlumnosPage } from './pages/PromocionarAlumnosPage'
 
 function App() {
   return (
@@ -28,7 +31,11 @@ function App() {
             <Route element={<Layout />}>
               <Route index element={<HomePage />} />
               <Route path="dashboard" element={<DashboardPage />} />
+              <Route element={<RequireAdmin />}>
+                <Route path="cursos/nuevo" element={<NuevoCursoPage />} />
+              </Route>
               <Route path="cursos/:cursoId/alumnos" element={<CursoAlumnosPage />} />
+              <Route path="cursos/:cursoId/promocion" element={<PromocionarAlumnosPage />} />
               <Route path="cursos/:cursoId/asistencia" element={<PasarAsistencia />} />
               <Route path="cursos/:cursoId/asistencias" element={<AsistenciasCursoPage />} />
               <Route path="cursos/:cursoId/asistencias/:fecha" element={<AsistenciaDiaPage />} />

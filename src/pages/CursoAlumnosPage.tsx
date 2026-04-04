@@ -19,6 +19,12 @@ export function CursoAlumnosPage() {
         </Link>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
           <Link
+            to={`/cursos/${cursoId}/promocion`}
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-primary/50 bg-secondary px-5 text-sm font-semibold text-ink shadow-s transition hover:border-primary hover:brightness-[0.99] active:brightness-[0.96]"
+          >
+            Promocionar alumnos
+          </Link>
+          <Link
             to={`/cursos/${cursoId}/asistencias`}
             className="inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-primary/50 bg-secondary px-5 text-sm font-semibold text-ink shadow-s transition hover:border-primary hover:brightness-[0.99] active:brightness-[0.96]"
           >

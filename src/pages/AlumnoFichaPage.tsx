@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { edadDesdeFechaNacimiento } from '../lib/edad'
 import { supabase } from '../lib/supabase'
 
@@ -43,6 +44,15 @@ type SeguimientoRow = {
   fecha_hito: string | null
 }
 
+type HistorialCursoRow = {
+  id: string
+  curso_id: string
+  fecha_inicio: string
+  fecha_fin: string | null
+  nota: string | null
+  cursos: CursoEmb | CursoEmb[] | null
+}
+
 type AlumnoFichaRow = {
   id: string
   nombre: string
@@ -59,6 +69,7 @@ type AlumnoFichaRow = {
   madre_dni: string | null
   cursos: CursoEmb | CursoEmb[] | null
   seguimiento_sacramental: SeguimientoRow[] | null
+  alumnos_historial_cursos: HistorialCursoRow[] | null
 }
 
 function cursoNormalizado(
@@ -79,8 +90,21 @@ function formatearFecha(isoDate: string | null): string | null {
   }).format(d)
 }
 
+/** fechas con hora (timestamptz desde Supabase) */
+function formatearFechaHora(iso: string | null): string | null {
+  if (!iso?.trim()) return null
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return null
+  return new Intl.DateTimeFormat('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(d)
+}
+
 export function AlumnoFichaPage() {
   const { alumnoId } = useParams<{ alumnoId: string }>()
+  const { user } = useAuth()
   const [fila, setFila] = useState<AlumnoFichaRow | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -117,7 +141,15 @@ export function AlumnoFichaPage() {
           madre_telefono,
           madre_dni,
           cursos ( id, nombre, nivel, anio_academico ),
-          seguimiento_sacramental ( tipo_hito, completado, fecha_hito )
+          seguimiento_sacramental ( tipo_hito, completado, fecha_hito ),
+          alumnos_historial_cursos (
+            id,
+            curso_id,
+            fecha_inicio,
+            fecha_fin,
+            nota,
+            cursos ( id, nombre, nivel, anio_academico )
+          )
         `,
         )
         .eq('id', alumnoId)
@@ -191,6 +223,10 @@ export function AlumnoFichaPage() {
       'es',
       { sensitivity: 'base' },
     ),
+  )
+  const historialOrdenado = [...(fila.alumnos_historial_cursos ?? [])].sort(
+    (a, b) =>
+      new Date(b.fecha_inicio).getTime() - new Date(a.fecha_inicio).getTime(),
   )
   const hitosRealizados = hitos.filter((h) => h.completado)
   const fechaNacStr = fila.fecha_nacimiento
@@ -427,6 +463,112 @@ export function AlumnoFichaPage() {
           <p className="mt-3 text-sm font-medium text-ink-muted">
             No se pudo cargar la información del curso.
           </p>
+        )}
+      </section>
+
+      <section
+        aria-labelledby="historial-cursos-heading"
+        className="rounded-3xl border border-ink/[0.08] bg-secondary p-5 shadow-s sm:p-6"
+      >
+        <h2
+          id="historial-cursos-heading"
+          className="text-lg font-semibold text-ink"
+        >
+          Historial de cursos
+        </h2>
+        <p className="mt-1 text-sm font-medium leading-relaxed text-ink-muted">
+          Períodos en cada curso (desde la fecha de alta o cambio). El período
+          sin fecha de fin es el actual.
+        </p>
+        {user && !user.esAdmin ? (
+          <p className="mt-2 text-xs font-medium text-ink-muted">
+            Solo verás entradas de cursos en los que figuras como profesor.
+          </p>
+        ) : null}
+
+        {historialOrdenado.length === 0 ? (
+          <p className="mt-4 text-sm font-medium text-ink-muted">
+            No hay registros de historial para este alumno.
+          </p>
+        ) : (
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-ink/10 bg-background shadow-s">
+            <table className="min-w-full divide-y divide-ink/10 text-left text-sm">
+              <thead className="bg-background/80">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 font-semibold text-ink"
+                  >
+                    Curso
+                  </th>
+                  <th
+                    scope="col"
+                    className="whitespace-nowrap px-4 py-3 font-semibold text-ink"
+                  >
+                    Desde
+                  </th>
+                  <th
+                    scope="col"
+                    className="whitespace-nowrap px-4 py-3 font-semibold text-ink"
+                  >
+                    Hasta
+                  </th>
+                  <th scope="col" className="px-4 py-3 font-semibold text-ink">
+                    Nota
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ink/10">
+                {historialOrdenado.map((h) => {
+                  const cursoH = cursoNormalizado(h.cursos)
+                  const desdeTxt = formatearFechaHora(h.fecha_inicio)
+                  const hastaTxt = h.fecha_fin
+                    ? formatearFechaHora(h.fecha_fin)
+                    : null
+                  return (
+                    <tr key={h.id} className="hover:bg-secondary/50">
+                      <td className="px-4 py-3">
+                        {cursoH ? (
+                          <div className="font-medium text-ink">
+                            <Link
+                              to={`/cursos/${h.curso_id}/alumnos`}
+                              className="text-ink underline decoration-primary/60 underline-offset-2 hover:decoration-primary"
+                            >
+                              {cursoH.nombre}
+                            </Link>
+                          </div>
+                        ) : (
+                          <span className="font-medium text-ink-muted">
+                            Curso sin datos
+                          </span>
+                        )}
+                        {cursoH ? (
+                          <p className="mt-0.5 text-xs font-medium text-ink-muted">
+                            {cursoH.nivel} · {cursoH.anio_academico}
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-ink">
+                        {desdeTxt ?? '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-ink">
+                        {hastaTxt ? (
+                          hastaTxt
+                        ) : (
+                          <span className="rounded-lg bg-primary/15 px-2 py-0.5 text-xs font-semibold text-ink">
+                            Actual
+                          </span>
+                        )}
+                      </td>
+                      <td className="max-w-[14rem] px-4 py-3 text-ink-muted">
+                        {h.nota?.trim() ? h.nota.trim() : '—'}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 

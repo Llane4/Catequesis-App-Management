@@ -28,13 +28,20 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex max-w-lg items-center justify-between gap-4 px-4 py-3 sm:max-w-2xl md:max-w-5xl sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <Link
-          to="/"
-          className="text-base font-semibold text-ink"
-          onClick={closeMenu}
-        >
-          Catequesis
-        </Link>
+        <div className="flex min-w-0 items-center gap-2">
+          <Link
+            to="/"
+            className="text-base font-semibold text-ink"
+            onClick={closeMenu}
+          >
+            Catequesis
+          </Link>
+          {user?.esAdmin ? (
+            <span className="hidden shrink-0 rounded-md bg-primary/20 px-2 py-0.5 text-xs font-semibold text-ink sm:inline">
+              Admin
+            </span>
+          ) : null}
+        </div>
 
         {/* Escritorio */}
         <nav
@@ -47,6 +54,11 @@ export function Navbar() {
           <NavLink to="/dashboard" className={navLinkClass}>
             Cursos
           </NavLink>
+          {user?.esAdmin ? (
+            <NavLink to="/cursos/nuevo" className={navLinkClass}>
+              Nuevo curso
+            </NavLink>
+          ) : null}
           <NavLink to="/alumnos" className={navLinkClass}>
             Alumnos
           </NavLink>
@@ -94,6 +106,15 @@ export function Navbar() {
             <NavLink to="/dashboard" className={navLinkClass} onClick={closeMenu}>
               Cursos
             </NavLink>
+            {user?.esAdmin ? (
+              <NavLink
+                to="/cursos/nuevo"
+                className={navLinkClass}
+                onClick={closeMenu}
+              >
+                Nuevo curso
+              </NavLink>
+            ) : null}
             <NavLink to="/alumnos" className={navLinkClass} onClick={closeMenu}>
               Alumnos
             </NavLink>
