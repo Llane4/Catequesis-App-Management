@@ -1,73 +1,32 @@
-# React + TypeScript + Vite
+# 🕊️ Catequesis App - Gestión Parroquial Mobile-First
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Una solución moderna y eficiente para la gestión de alumnos, asistencias e hitos sacramentales, diseñada específicamente para ser utilizada en dispositivos móviles por catequistas y coordinadores.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📖 Sobre el Proyecto
 
-## React Compiler
+Este proyecto nace de la necesidad de digitalizar el seguimiento de los alumnos en los procesos de catequesis (Comunión, Confirmación, etc.). La aplicación permite a los profesores gestionar sus cursos en tiempo real, eliminando las planillas de papel y centralizando la información de sacramentos y entregas de material.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### ✨ Características Principales
 
-## Expanding the ESLint configuration
+* **📱 Diseño Mobile-First:** Interfaz optimizada para el uso en celulares con botones grandes y navegación táctil.
+* **🔐 Autenticación Segura:** Sistema de login para profesores mediante Supabase Auth.
+* **📊 Gestión de Alumnos:** Registro completo de datos personales, DNI y asignación de cursos.
+* **✅ Asistencia Inteligente:** Sistema de toma de asistencia rápida con estados (Presente/Ausente/Justificado) e historial por fechas.
+* **🏆 Seguimiento de Hitos:** Control detallado de entregas (Biblia, Rosario, Cruz, etc.) y fechas de sacramentos realizados.
+* **🎨 Estética Amigable:** Paleta de colores pastel y tipografía legible (Outfit/Quicksand) para una experiencia de usuario relajante.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Tecnologías Utilizadas
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+El stack tecnológico fue elegido para garantizar velocidad, escalabilidad y facilidad de despliegue:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+* **Frontend:** [React.js](https://reactjs.org/) con [Vite](https://vitejs.dev/) para un desarrollo ultra rápido.
+* **Estilos:** [Tailwind CSS](https://tailwindcss.com/) para un diseño personalizado y responsivo.
+* **Base de Datos y Auth:** [Supabase](https://supabase.com/) (PostgreSQL) para la gestión de datos en tiempo real y seguridad.
+* **Iconografía:** [Lucide React](https://lucide.dev/) para iconos minimalistas.
+* **Despliegue:** [Vercel](https://vercel.com/) para el hosting del frontend.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
